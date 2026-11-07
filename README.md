@@ -18,6 +18,7 @@ Extraia o ZIP e abra a pasta `portal-integrado-final` no VS Code (Arquivo > Abri
 cd backend
 java -version
 mvn -version
+${DB_MONGODB_URI}
 mvn spring-boot:run
 ```
 Se `mvn` não for reconhecido, instale Maven e inclua `bin` no PATH. Se houver `mvnw.cmd`, pode usar `./mvnw.cmd spring-boot:run`.
