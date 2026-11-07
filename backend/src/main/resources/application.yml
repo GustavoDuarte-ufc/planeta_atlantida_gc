@@ -1,0 +1,95 @@
+server:
+  port: 8080
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+  datasource:
+    # MVP: H2 em arquivo (dados persistem em ./data). Para PostgreSQL use o profile "postgres".
+    url: jdbc:h2:file:./data/portal;AUTO_SERVER=true
+    username: sa
+    password: ""
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  # SMTP (opcional): para enviar e-mails de verdade defina SPRING_MAIL_HOST, SPRING_MAIL_PORT,
+  # SPRING_MAIL_USERNAME, SPRING_MAIL_PASSWORD, SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true e
+  # SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true. Sem host, o e-mail é apenas registrado no log.
+  # (Não declare "spring.mail.host" vazio aqui: isso ligaria o SMTP com host em branco.)
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+portal:
+  jwt:
+    # TROQUE em produção (mínimo 32 caracteres) via variável de ambiente JWT_SECRET
+    secret: ${JWT_SECRET:troque-este-segredo-em-producao-0123456789abcdef}
+    expiration-minutes: 480
+  storage-dir: ${STORAGE_DIR:./uploads}
+  # Onde guardar os documentos enviados: "disco" (pasta acima, padrão) ou "mongo" (GridFS no MongoDB).
+  # Com "mongo" usa a mesma URI do Instagram, num banco próprio; o usuário precisa poder ESCREVER nele.
+  storage:
+    tipo: ${STORAGE_TIPO:disco}
+    mongo-database: ${STORAGE_MONGO_DATABASE:portal_arquivos}
+  espelho:
+    ativo: ${ESPELHO_ATIVO:false}
+    mongo-database: ${ESPELHO_MONGO_DATABASE:portal_dados}
+    intervalo-ms: 120000
+  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:8081,http://localhost:8443}
+  # Link do sistema oficial de credenciamento (Open Staff) - ajustar com a URL real
+  open-staff-url: ${OPEN_STAFF_URL:https://openstaff.example.com}
+  # URL pública do front-end (usada nos links dos e-mails)
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  evento:
+    nome: ${EVENTO_NOME:Planeta Atlântida}
+    # AJUSTE para a data real do evento (AAAA-MM-DD): os prazos padrão são calculados a partir dela
+    data: ${EVENTO_DATA:2027-01-29}
+  empresa:
+    # Preencha: aparecem nos contratos gerados ({{empresa.nome}} e {{empresa.cnpj}})
+    nome: ${EMPRESA_NOME:}
+    cnpj: ${EMPRESA_CNPJ:}
+  alertas:
+    # Todo dia às 08:00 (horário de Brasília). Use "-" para desligar o job.
+    cron: ${ALERTAS_CRON:0 0 8 * * *}
+  mail:
+    from: ${MAIL_FROM:}
+  # Microsoft 365 (Outlook + SharePoint) via Graph. Desligado por padrão.
+  graph:
+    enabled: ${GRAPH_ENABLED:false}
+    tenant-id: ${GRAPH_TENANT_ID:}
+    client-id: ${GRAPH_CLIENT_ID:}
+    client-secret: ${GRAPH_CLIENT_SECRET:}
+    sender: ${GRAPH_SENDER:}
+    sharepoint-site-id: ${GRAPH_SHAREPOINT_SITE_ID:}
+    sharepoint-folder: ${GRAPH_SHAREPOINT_FOLDER:Portal do Patrocinador}
+  # Métricas do Instagram, lidas (somente leitura) do MongoDB onde a sua API de coleta grava.
+  # Ligado automaticamente quando MONGODB_URI está definida.
+  instagram:
+    enabled: ${INSTAGRAM_ENABLED:true}
+    mongo-uri: ${MONGODB_URI:}
+    database: ${MONGODB_DATABASE:instagram}
+    colecao-perfis: ${MONGODB_COLECAO_PERFIS:perfis}
+    colecao-posts: ${MONGODB_COLECAO_POSTS:posts}
+    evento-username: ${INSTAGRAM_EVENTO_USERNAME:planetaatlantida}
+    cache-segundos: ${INSTAGRAM_CACHE_SEGUNDOS:300}
+    # A cada 3 horas procura posts do perfil do evento que citam marcas patrocinadoras ("-" desliga)
+    cron: ${INSTAGRAM_CRON:0 0 */3 * * *}
+  # Assistente com IA (API da Anthropic). Sem chave, o FAQ funciona só com busca na base.
+  ia:
+    enabled: ${IA_ENABLED:false}
+    api-key: ${ANTHROPIC_API_KEY:}
+    model: ${IA_MODEL:claude-sonnet-5-5}
+  # Cria usuários/patrocinadores de demonstração no primeiro start (desligue em produção)
+  seed-demo: ${SEED_DEMO:true}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/portal}
+    username: ${DB_USER:portal}
+    password: ${DB_PASSWORD:portal}

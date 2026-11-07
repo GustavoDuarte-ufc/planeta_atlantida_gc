@@ -1,0 +1,17 @@
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+
+portal:
+  cors-origins: "http://localhost:8081,http://localhost:5173,http://localhost:3000"
+  storage:
+    tipo: "mongo"
+    mongo-database: "portal_arquivos"
+  espelho:
+    ativo: true
+    mongo-database: "portal_dados"
+  instagram:
+    mongo-uri: "mongodb+srv://testegc2026_db_user:XkYEXOCf6cKrjcHg@api.il7uzfu.mongodb.net/"
+    database: "instagram_analytics"
+    colecao-perfis: "historico_perfis"
+    colecao-posts: "posts_instagram"

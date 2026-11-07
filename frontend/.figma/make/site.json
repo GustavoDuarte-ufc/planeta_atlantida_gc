@@ -1,0 +1,10 @@
+{
+  "description": "Ajuda você a aproveitar ao máximo o frontend, reunindo recursos para otimizar a interface e melhorar a experiência digital.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

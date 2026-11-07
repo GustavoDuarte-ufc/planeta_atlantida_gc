@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# Conexão com o MongoDB do Instagram (somente leitura).
+#
+# COMO USAR
+#   1. Copie este arquivo para  backend/config/application.yml   (o iniciar.ps1 faz isso sozinho)
+#   2. Tire o "#" das linhas abaixo e preencha os valores.
+#   3. Suba o back-end (iniciar.ps1) e, no portal, abra Integrações > Instagram > "Testar conexão".
+#
+# O Spring Boot lê automaticamente backend/config/application.yml e ele vale mais do que o padrão.
+# NÃO envie o application.yml (com a senha) para ninguém nem para o Git: ele já está no .gitignore.
+# ---------------------------------------------------------------------------
+portal:
+  instagram:
+    # Cole a URI do Atlas (Connect > Drivers > Java). Se a senha tiver @ : / ? # %, troque cada um por %40 %3A %2F %3F %23 %25.
+    # mongo-uri: "mongodb+srv://USUARIO:SENHA@SEU-CLUSTER.mongodb.net/"
+
+    # Nome do banco e das duas coleções (Atlas > Browse Collections).
+    # database: "instagram"
+    # colecao-perfis: "perfis"
+    # colecao-posts: "posts"
+
+    # @ do perfil oficial do evento, como gravado em "username" no banco (sem o @).
+    # evento-username: "planetaatlantida"
+
+    # Quanto tempo os números ficam em cache (segundos) e de quanto em quanto tempo procura menções às marcas.
+    # cache-segundos: 300
+    # cron: "0 0 */3 * * *"   # use "-" para desligar o aviso de menções
+
+#  # Espelho dos dados do sistema (patrocinadores, usuarios, prazos...) no MongoDB.
+#  # Se a pasta backend/data estiver vazia ao iniciar, o sistema restaura tudo do Mongo.
+#  espelho:
+#    ativo: true
+#    mongo-database: "portal_dados"
