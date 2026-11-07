@@ -11,7 +11,7 @@ portal:
     ativo: true
     mongo-database: "portal_dados"
   instagram:
-    mongo-uri: "mongodb+srv://testegc2026_db_user:XkYEXOCf6cKrjcHg@api.il7uzfu.mongodb.net/"
+    mongo-uri: ${DB_MONGODB_URI}
     database: "instagram_analytics"
     colecao-perfis: "historico_perfis"
     colecao-posts: "posts_instagram"
