@@ -1,151 +1,238 @@
-# Portal do Patrocinador — frontend original + backend Spring Boot
-# Chameleon Tech
+# Portal do Patrocinador
+
+Portal web para gestão de patrocinadores do **Planeta Atlântida 2027**, desenvolvido pela **Chameleon Tech**. Reúne o frontend original (React) e um backend Spring Boot com autenticação JWT.
+
+## Sumário
+
+- [Visão geral](#visão-geral)
+- [Requisitos](#requisitos)
+- [Início rápido](#início-rápido)
+- [Acesso de demonstração](#acesso-de-demonstração)
+- [Configuração](#configuração)
+- [API](#api)
+- [Funcionalidades](#funcionalidades)
+- [Dados de demonstração](#dados-de-demonstração)
+- [Testes e verificações](#testes-e-verificações)
+- [Segurança](#segurança)
+- [Limitações conhecidas](#limitações-conhecidas)
+- [Histórico de alterações](#histórico-de-alterações)
+
+---
+
+## Visão geral
+
+| Camada | Pasta | Tecnologias |
+|---|---|---|
+| Frontend | `frontend/` | React, Vite, TypeScript (componentes e estilos preservados do ZIP recebido) |
+| Backend | `backend/` | Spring Boot, Spring Security (JWT), H2 persistente em arquivo (ou PostgreSQL com o profile `postgres`) |
 
 ## Requisitos
-- VS Code com extensões **Extension Pack for Java** e **Spring Boot Extension Pack**
-- JDK 21, Maven 3.9+ (ou Maven Wrapper se disponível), Node.js 22+ e npm
-- Windows PowerShell
 
-## Estrutura
-- `frontend/`: React + Vite + TypeScript, preservando os componentes e estilos do ZIP recebido.
-- `backend/`: Spring Boot + Spring Security JWT + H2 persistente (ou PostgreSQL com profile `postgres`).
+- **VS Code** com as extensões *Extension Pack for Java* e *Spring Boot Extension Pack*
+- **JDK 21**
+- **Maven 3.9+** (ou Maven Wrapper, se disponível)
+- **Node.js 22+** e npm
+- **Windows PowerShell**
 
-## 1. Abrir no VS Code
-Extraia o ZIP e abra a pasta `portal-integrado-final` no VS Code (Arquivo > Abrir Pasta). Abra **dois terminais** (Terminal > Novo Terminal).
+## Início rápido
 
-## 2. Backend (terminal 1)
+### 1. Abrir o projeto
+
+Extraia o ZIP e abra a pasta `portal-integrado-final` no VS Code (*Arquivo > Abrir Pasta*). Abra **dois terminais** (*Terminal > Novo Terminal*).
+
+### 2. Backend (terminal 1)
+
 ```powershell
 cd backend
 java -version
 mvn -version
-${DB_MONGODB_URI}
 mvn spring-boot:run
 ```
-Se `mvn` não for reconhecido, instale Maven e inclua `bin` no PATH. Se houver `mvnw.cmd`, pode usar `./mvnw.cmd spring-boot:run`.
-API: http://localhost:8080. O banco H2 é criado automaticamente em `backend/data/`.
 
-## 3. Frontend (terminal 2)
+- API disponível em **http://localhost:8080**.
+- O banco H2 é criado automaticamente em `backend/data/`.
+- Se `mvn` não for reconhecido, instale o Maven e inclua a pasta `bin` no `PATH`. Se houver `mvnw.cmd`, use `./mvnw.cmd spring-boot:run`.
+
+### 3. Frontend (terminal 2)
+
 ```powershell
 cd frontend
 Copy-Item .env.example .env
 npm install
 npm run dev
 ```
-Abra **http://localhost:8081**. O frontend chama a API em `http://localhost:8080` via `VITE_API_URL`.
 
-## 4. Login de demonstração
-Com `SEED_DEMO=true` (padrão), no primeiro início o backend cria o administrador:
-- E-mail: `admin@rbs.com.br`
-- Senha: `Admin@1234`
-Troque as credenciais e defina `SEED_DEMO=false` antes de disponibilizar o sistema publicamente. Não utilize contas demo em produção.
+- Abra **http://localhost:8081**.
+- O frontend chama a API em `http://localhost:8080` por meio da variável `VITE_API_URL`.
 
-## 5. Configurações e banco
-O backend usa H2 em arquivo por padrão. Para PostgreSQL, configure `DB_URL`, `DB_USER`, `DB_PASSWORD` no terminal e inicie com:
+### 4. Primeiro acesso
+
+Entre primeiro com o **administrador RBS** (veja [Acesso de demonstração](#acesso-de-demonstração)) para inicializar o estado de demonstração no H2. Depois, saia e experimente os logins das marcas.
+
+## Acesso de demonstração
+
+Com `SEED_DEMO=true` (padrão), o backend cria as contas abaixo se ainda não existirem. **Senhas de contas já existentes não são alteradas.**
+
+| Perfil | E-mail | Senha inicial |
+|---|---|---|
+| RBS (administrador) | `admin@rbs.com.br` | `Admin@1234` |
+| Solar Bebidas | `patrocinador@solar.com.br` | `Solar@1234` |
+| Banco do Sul | `felipe@bancodosul.com.br` | `Banco@1234` |
+| Nativa Telecom | `camila@nativatelecom.com.br` | `Nativa@1234` |
+| Cooperativa Horizonte | `eduardo@horizonte.coop.br` | `Cooper@1234` |
+| Universo Tech | `renata@universotech.com.br` | `Universo@1234` |
+
+> ⚠️ Não utilize contas de demonstração em produção. Veja [Segurança](#segurança).
+
+## Configuração
+
+### Variáveis de ambiente
+
+| Variável | Onde | Descrição |
+|---|---|---|
+| `VITE_API_URL` | Frontend (`.env`) | URL base da API (padrão local: `http://localhost:8080`) |
+| `SEED_DEMO` | Backend | Cria as contas de demonstração no primeiro início (padrão: `true`) |
+| `JWT_SECRET` | Backend | Segredo do JWT; use um valor seguro com **32+ caracteres** em produção |
+| `CORS_ORIGINS` | Backend | Origens permitidas, separadas por vírgula |
+| `SPRING_PROFILES_ACTIVE` | Backend | Use `postgres` para trocar o H2 pelo PostgreSQL |
+| `DB_URL`, `DB_USER`, `DB_PASSWORD` | Backend | Conexão com o PostgreSQL (profile `postgres`) |
+
+### Banco de dados
+
+O backend usa **H2 em arquivo** por padrão. Para usar PostgreSQL, defina `DB_URL`, `DB_USER` e `DB_PASSWORD` no terminal e inicie com:
+
 ```powershell
 $env:SPRING_PROFILES_ACTIVE='postgres'
 mvn spring-boot:run
 ```
-Para CORS, o backend libera `http://localhost:5173`, `http://localhost:8081` e `http://localhost:8443` por padrão. Para outros endereços, configure `CORS_ORIGINS` com origens separadas por vírgula. Defina `JWT_SECRET` seguro (32+ caracteres) em produção.
 
-## 6. Integração
-- Login real: `POST /api/auth/login`; sessão: `GET /api/auth/me`.
-- Estado do portal: `GET/PUT /api/portal-state`, persistido no H2; separado entre administrador RBS e patrocinadores.
-- Pesquisa pública: `GET/POST /api/public/pesquisa`.
-- Exclusão de respostas: `DELETE /api/portal-state/survey`.
-- As rotas de negócio já existentes no backend continuam disponíveis.
+> Não remova a pasta `backend/data` se quiser preservar os dados. Não há integração com MongoDB nesta versão.
 
-## 7. Verificações
+### CORS
+
+Por padrão, o backend libera `http://localhost:5173`, `http://localhost:8081` e `http://localhost:8443`. Para outros endereços, defina `CORS_ORIGINS` com as origens separadas por vírgula.
+
+## API
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `POST` | `/api/auth/login` | Login |
+| `GET` | `/api/auth/me` | Sessão atual |
+| `GET` / `PUT` | `/api/portal-state` | Estado do portal, persistido no H2 e separado entre administrador RBS e patrocinadores |
+| `DELETE` | `/api/portal-state/survey` | Exclusão de respostas da pesquisa |
+| `GET` / `POST` | `/api/public/pesquisa` | Pesquisa pública |
+| `POST` | `/api/portal-access/usuarios` | Cria ou atualiza usuário de marca (restrito à RBS) |
+| `POST` | `/api/patrocinadores/{pid}/arquivos` | Envio de arquivos do patrocinador (inclui a categoria `CONTRATO_ASSINADO`) |
+
+As rotas de negócio já existentes no backend continuam disponíveis.
+
+## Funcionalidades
+
+### Liberação de acesso das marcas
+
+O formulário **Liberar e-mail de acesso** cria ou atualiza o usuário no backend Spring Security (`POST /api/portal-access/usuarios`, restrito à RBS).
+
+- O patrocinador é vinculado ao identificador da marca do frontend, e o login devolve esse vínculo.
+- As senhas são armazenadas com **BCrypt**.
+- Uma marca não acessa endpoints exclusivos da RBS; nesses casos, o **403** é a resposta correta.
+
+### Contrato enviado pela marca
+
+Na conta da marca: **Contrato > Enviar contrato PDF**. É possível substituir, visualizar e remover o PDF enviado.
+
+- O arquivo integra o estado do portal salvo no H2 (`/api/portal-state`).
+- Limite atual no frontend: **750 KB**.
+- O backend permite a categoria `CONTRATO_ASSINADO` para usuários autorizados da marca.
+
+> ⚠️ O estado da marca é separado do estado da RBS, então arquivos enviados por esta interface **não aparecem automaticamente na conta RBS**. Não use o envio como prova de recebimento pela RBS até a interface ser integrada ao endpoint de arquivos do backend e ao identificador numérico do patrocinador.
+
+### Relatórios
+
+Na conta RBS, aba **Relatório**:
+
+- **Salvar relatório geral** e **Salvar geral por tipo de entrega** gravam uma cópia CSV dos dados do momento no estado do portal (H2), que pode ser baixada ou excluída.
+- O consolidado por tipo de entrega considera entregas com status **Concluído**, agrupadas por categoria, com totais e quantidade de marcas.
+
+### Exportação Excel (.xlsx)
+
+Os botões de download geram arquivos `.xlsx` reais para: relatórios gerais, entregas por tipo, Instagram, mídias e pesquisa de satisfação.
+
+- Relatórios salvos anteriormente (inclusive os exemplos em CSV) continuam no formato interno; o botão **Baixar Excel** converte o conteúdo no momento do download.
+- Os arquivos têm cabeçalhos destacados, filtros e largura de coluna ajustada.
+- Não é preciso instalar bibliotecas adicionais.
+
+### Identidade visual Planeta Atlântida 2027
+
+As imagens foram extraídas de `Visual_PA27_padrão.pdf` e ficam em `frontend/public/branding/`, sem depender de URLs externas.
+
+| Arquivo | Uso |
+|---|---|
+| `logo-pa27.png` | Símbolo do Planeta Atlântida 2027 |
+| `login-pa27.jpg` | Arte da página 5, exibida no login |
+| `banner-pa27.jpg` | Arte da página 6, exibida no painel |
+| `logo-hero-pa27.jpg` | Arte da página 7, para reutilização |
+| `festival-pa27.jpg` | Arte da página 9, para reutilização |
+| `perfil-rbs-pa27.png` | Avatar da equipe RBS (atualize o navegador com `Ctrl+Shift+R`) |
+
+## Dados de demonstração
+
+O frontend já contém eventos, marcas fictícias, entregas com diferentes status, solicitações de arquivos, cortesias, credenciamentos, métricas, resultados e mensagens de exemplo, além de dois relatórios CSV salvos no evento de 2025.
+
+- Os dados são **fictícios** e não representam contratos reais nem arquivos enviados.
+- Os dados existentes **não são apagados**. Se o portal já foi inicializado, o estado salvo prevalece sobre os exemplos novos.
+- Para ver todos os dados de demonstração, use uma **instância H2 de teste separada**; nunca exclua o banco de produção.
+- Persistência: os dados de cada marca ficam em áreas separadas. A primeira leitura herda o estado inicial da RBS, mas as atualizações seguintes **não** são sincronizadas entre as áreas (não é uma sincronização bidirecional).
+
+## Testes e verificações
+
 ```powershell
-# No backend
+# Backend
+cd backend
 mvn test
-# No frontend
+
+# Frontend
+cd frontend
 npm run build
 ```
-No PowerShell, teste o preflight CORS:
+
+Teste do preflight CORS (com o backend iniciado; o esperado é **HTTP 200**):
+
 ```powershell
 curl.exe -i -X OPTIONS 'http://localhost:8080/api/auth/login' -H 'Origin: http://localhost:8081' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
 ```
-O retorno esperado é HTTP 200, desde que o backend esteja iniciado.
 
-## Limitações importantes
-Os arquivos `.asset.json` do frontend original são apenas **metadados**: as imagens JPG/PNG e o PDF que eles referenciam não estavam presentes no ZIP recebido. Para exibir esses recursos, inclua os arquivos originais em `frontend/public/` e ajuste as referências no código. O estado JSON mantém a interface original, mas não substitui regras de autorização específicas para cada operação do negócio; valide o isolamento antes de produção. O sistema não foi validado em execução ponta a ponta neste ambiente.
+## Segurança
 
-## Correção de login das marcas (403)
+Antes de disponibilizar o sistema publicamente:
 
-O formulário **Liberar e-mail de acesso** agora cria ou atualiza também o usuário no
-backend Spring Security (`POST /api/portal-access/usuarios`, restrito à RBS).
-Anteriormente o formulário apenas atualizava o estado visual, portanto não criava
-uma conta autenticável. O patrocinador é vinculado ao identificador da marca do
-frontend, e o login devolve esse vínculo. Senhas são armazenadas com BCrypt.
+- [ ] Definir `SEED_DEMO=false`
+- [ ] Trocar as credenciais do administrador e de todas as contas padrão
+- [ ] Definir um `JWT_SECRET` seguro (32+ caracteres)
+- [ ] Configurar `CORS_ORIGINS` com os endereços reais
+- [ ] Validar o isolamento entre RBS e marcas (o estado JSON não substitui regras de autorização específicas por operação)
 
-**Para marcas cadastradas antes desta versão:** entre como administrador RBS,
-abra a marca e edite cada e-mail liberado, definindo uma nova senha de pelo
-menos oito caracteres. Salve para sincronizar a conta real no backend. Para
-marcas novas, use o formulário normalmente. Uma marca não pode acessar endpoints
-exclusivos da RBS; nesses casos 403 continua sendo a resposta correta.
+## Limitações conhecidas
 
-O frontend não preenche mais senhas de demonstração incorretas. A senha padrão
-RBS de desenvolvimento, se o seeder estiver habilitado e o banco estiver vazio,
-é `Admin@1234`. Altere-a antes de publicar.
+- Os arquivos `.asset.json` do frontend original são apenas **metadados**: as imagens JPG/PNG e o PDF que eles referenciam não vieram no ZIP. Para exibi-los, coloque os arquivos originais em `frontend/public/` e ajuste as referências no código.
+- O estado JSON mantém a interface original, mas não substitui regras de autorização por operação de negócio.
+- Arquivos enviados pela marca não chegam automaticamente à conta RBS (veja [Contrato enviado pela marca](#contrato-enviado-pela-marca)).
+- Os dados das marcas e da RBS não são sincronizados entre si após a primeira leitura.
+- O sistema **não foi validado em execução ponta a ponta** no ambiente de desenvolvimento, e as dependências npm não puderam ser instaladas offline. Execute `npm install && npm run build` no VS Code para validar a compilação.
 
-**Persistência:** esta versão mantém o banco H2 local e não adiciona nem ativa
-nenhuma integração MongoDB. Os dados do portal por marca continuam em áreas
-separadas; a primeira leitura herda o estado inicial da RBS, mas atualizações
-posteriores não são sincronizadas automaticamente entre as áreas. Não considere
-este fluxo uma sincronização bidirecional de dados entre marcas e RBS.
+## Histórico de alterações
 
-## Novas funcionalidades — contratos e relatórios salvos
+### Correção de login das marcas (403)
 
-### Contrato enviado pela marca
-Na conta da marca, acesse **Contrato > Enviar contrato PDF**. É possível substituir, visualizar e remover o PDF enviado. O arquivo integra o estado do portal salvo no H2 pela rota `/api/portal-state`. O limite atual de arquivos no frontend é **750 KB**. O backend também passou a permitir a categoria `CONTRATO_ASSINADO` para usuários autorizados da marca em `POST /api/patrocinadores/{pid}/arquivos`.
+Antes, o formulário **Liberar e-mail de acesso** apenas atualizava o estado visual e não criava uma conta autenticável. Agora ele cria ou atualiza o usuário real no backend.
 
-**Atenção:** o estado do portal da marca é separado do estado da RBS nesta versão. Portanto, arquivos enviados por esta interface não são automaticamente exibidos na conta RBS. Para um fluxo de revisão centralizado, será necessária a integração da interface com o endpoint de arquivos do backend e com o identificador numérico do patrocinador. Não use o envio pela interface como prova de recebimento pela RBS até essa integração estar concluída.
+**Para marcas cadastradas antes desta versão:** entre como administrador RBS, abra a marca e edite cada e-mail liberado, definindo uma nova senha de pelo menos 8 caracteres. Salve para sincronizar a conta no backend. Para marcas novas, use o formulário normalmente.
 
-### Relatórios gerais salvos
-Na conta RBS, acesse **Relatório**. Há botões para **Salvar relatório geral** e **Salvar geral por tipo de entrega**. Cada operação grava uma cópia CSV dos dados daquele momento no estado do portal, persistido em H2, e permite baixar ou excluir a cópia salva. O consolidado por tipo de entrega considera entregas com status **Concluído**, agrupadas pela categoria, com totais e quantidade de marcas.
+O frontend não preenche mais senhas de demonstração incorretas. A senha padrão RBS de desenvolvimento (`Admin@1234`) só vale se o seeder estiver habilitado e o banco estiver vazio.
 
-### Testes e limitações
-Não foi possível instalar dependências npm offline neste ambiente; execute `npm install && npm run build` no seu VS Code para validar a compilação. O projeto mantém H2 e não requer configurar MongoDB. Não remova a pasta `backend/data` se quiser preservar os dados.
+### Novas funcionalidades
 
-
-## Dados de demonstração (H2, sem MongoDB)
-
-O frontend já contém eventos, marcas fictícias, entregas com diferentes status, solicitações de arquivos, cortesias, credenciamentos, métricas, resultados e mensagens de exemplo. Esta edição inclui também dois relatórios CSV salvos no evento de 2025. Os dados são **fictícios** e não representam contratos reais nem arquivos enviados.
-
-Com `SEED_DEMO=true` (padrão), o backend cria, se ainda não existirem, as contas abaixo. **Não altera senhas de contas existentes**. O administrador precisa fazer login primeiro para inicializar o estado de demonstração no H2.
-
-| Perfil | E-mail | Senha inicial |
-|---|---|---|
-| RBS | admin@rbs.com.br | Admin@1234 |
-| Solar Bebidas | patrocinador@solar.com.br | Solar@1234 |
-| Banco do Sul | felipe@bancodosul.com.br | Banco@1234 |
-| Nativa Telecom | camila@nativatelecom.com.br | Nativa@1234 |
-| Cooperativa Horizonte | eduardo@horizonte.coop.br | Cooper@1234 |
-| Universo Tech | renata@universotech.com.br | Universo@1234 |
-
-**Banco já utilizado:** os dados existentes não são apagados. Se o portal já foi inicializado anteriormente, o estado salvo prevalece sobre os exemplos novos. Para experimentar todos os dados de demonstração, utilize uma instância H2 de teste separada, nunca exclua o banco de produção.
-
-**Execução no VS Code:** abra a pasta `backend` e execute `mvn spring-boot:run`; em outro terminal abra `frontend`, execute `npm install` e `npm run dev`. Entre primeiro com o administrador. Em seguida, saia e experimente os logins das marcas.
-
-**Segurança:** use `SEED_DEMO=false` fora do ambiente de desenvolvimento e altere todas as senhas padrão.
-
-## Exportação Excel (.xlsx)
-
-Na aba **Relatório**, os botões de download agora geram arquivos Excel reais (`.xlsx`) para os relatórios gerais, entregas por tipo, Instagram, mídias e pesquisa de satisfação. Os relatórios gerais salvos anteriormente (inclusive exemplos em CSV) continuam armazenados no mesmo formato interno para compatibilidade, mas o botão **Baixar Excel** converte o conteúdo para `.xlsx` no momento do download. Não é necessário instalar bibliotecas adicionais ou configurar o MongoDB.
-
-Os arquivos possuem cabeçalhos destacados, filtros e largura de coluna ajustada. Os demais módulos e o banco H2 permanecem inalterados.
-
-
-## Identidade visual Planeta Atlântida 2027
-
-As imagens de marca foram extraídas do arquivo fornecido `Visual_PA27_padrão.pdf` e incluídas localmente em `frontend/public/branding/`.
-- `logo-pa27.png`: símbolo do Planeta Atlântida 2027 (extraído do PDF).
-- `login-pa27.jpg`: arte da página 5, exibida no login.
-- `banner-pa27.jpg`: arte da página 6, exibida no painel.
-- `logo-hero-pa27.jpg` e `festival-pa27.jpg`: artes adicionais das páginas 7 e 9 para reutilização.
-
-O frontend não depende de URLs externas para estas imagens. Nenhuma configuração do MongoDB foi adicionada.
-
-
-### Logo do perfil RBS
-O avatar da equipe RBS usa `frontend/public/branding/perfil-rbs-pa27.png`. Atualize o navegador com Ctrl+Shift+R.
+- Contratos enviados pela marca
+- Relatórios gerais salvos
+- Exportação Excel (`.xlsx`)
+- Dados de demonstração
+- Identidade visual Planeta Atlântida 2027
