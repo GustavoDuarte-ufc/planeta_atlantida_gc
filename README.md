@@ -13,6 +13,7 @@ Portal web para gestão de patrocinadores do **Planeta Atlântida 2027**, desenv
 - [Funcionalidades](#funcionalidades)
 - [Dados de demonstração](#dados-de-demonstração)
 - [Testes e verificações](#testes-e-verificações)
+- [Solução de problemas](#solução-de-problemas)
 - [Segurança](#segurança)
 - [Limitações conhecidas](#limitações-conhecidas)
 - [Histórico de alterações](#histórico-de-alterações)
@@ -200,6 +201,22 @@ Teste do preflight CORS (com o backend iniciado; o esperado é **HTTP 200**):
 ```powershell
 curl.exe -i -X OPTIONS 'http://localhost:8080/api/auth/login' -H 'Origin: http://localhost:8081' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: content-type'
 ```
+
+## Solução de problemas
+
+| Sintoma | Causa provável | O que fazer |
+|---|---|---|
+| `mvn` não é reconhecido | Maven não instalado ou fora do `PATH` | Instale o Maven e inclua a pasta `bin` no `PATH`, ou use `./mvnw.cmd spring-boot:run` se o wrapper existir |
+| O frontend não consegue chamar a API | Backend parado ou `VITE_API_URL` incorreta | Confirme que o backend está rodando em `http://localhost:8080` e que o `frontend/.env` (copiado de `.env.example`) aponta para ele |
+| Erro de CORS no navegador | A origem do frontend não está na lista liberada | Defina `CORS_ORIGINS` com a origem usada e rode o [teste de preflight](#testes-e-verificações) (esperado: HTTP 200) |
+| Marca recebe **403** ao acessar algo | Endpoint exclusivo da RBS | Comportamento esperado: marcas não acessam rotas da RBS |
+| Marca não consegue fazer login | Marca cadastrada antes da correção de login ou senha não definida | Como administrador RBS, edite cada e-mail liberado da marca, defina uma nova senha (mínimo 8 caracteres) e salve |
+| `admin@rbs.com.br` / `Admin@1234` não entra | O seeder só cria contas que ainda não existem e não altera senhas existentes | Use a senha já definida nesse banco ou uma instância H2 nova (`backend/data/` separada) |
+| Dados de demonstração não aparecem | O portal já havia sido inicializado, e o estado salvo prevalece | Entre primeiro como administrador RBS; para ver todos os exemplos, use uma instância H2 de teste separada |
+| Contrato enviado pela marca não aparece na conta RBS | Estados da marca e da RBS são separados nesta versão | Veja [Contrato enviado pela marca](#contrato-enviado-pela-marca) |
+| Imagens ou PDF do frontend original não aparecem | Os `.asset.json` são apenas metadados | Coloque os arquivos originais em `frontend/public/` e ajuste as referências |
+| Avatar ou logo da RBS não atualiza | Cache do navegador | Atualize com `Ctrl+Shift+R` |
+| Falha ao compilar o frontend | Dependências npm não instaladas | Rode `npm install && npm run build` dentro de `frontend/` |
 
 ## Segurança
 
